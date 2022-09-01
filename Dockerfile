@@ -11,3 +11,7 @@ RUN add-apt-repository \
 RUN apt-get update && \
     apt-get -y install docker-ce
 RUN usermod -a -G docker jenkins
+
+VOLUME ["/var/jenkins_home/logs", "/var/jenkins_home/cache"]
+VOLUME ["/var/jenkins_home/jobs", "/var/jenkins_home/jenkins-jobs"]
+VOLUME ["/var/jenkins_home/secrets"]
