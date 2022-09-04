@@ -1,1 +1,1 @@
-## Jenkins LTS Alpine JDK8
+## Jenkins LTS JDK8

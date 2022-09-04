@@ -1,16 +1,31 @@
-FROM jenkins/jenkins:lts-alpine-jdk8
+FROM jenkins/jenkins:lts-jdk8
 
+ARG jenkins_usr=admin
+ARG jenkins_psswrd=admin
+ARG user=jenkins
+ARG group=jenkins
+ARG uid=1000
+ARG gid=1000
+ARG JENKINS_HOME=/var/jenkins_home
+ENV JENKINS_USER ${jenkins_usr}
+ENV JENKINS_PASS ${jenkins_psswrd}
 ENV JAVA_OPTS -Djenkins.install.runSetupWizard=false
 
+
+COPY plugins.txt /usr/share/jenkins/plugins.txt
+RUN /usr/local/bin/install-plugins.sh < /usr/share/jenkins/plugins.txt
 USER root
 
-RUN apk update
+RUN apt-get update \
+    && apt-get install -qqy apt-transport-https ca-certificates curl gnupg2 software-properties-common && \
+    curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add - && \
+    add-apt-repository \
+   "deb [arch=amd64] https://download.docker.com/linux/debian \
+   $(lsb_release -cs) \
+   stable" && \
+    apt-get update  -qq  && \
+    apt-get -y --no-install-recommends install docker-ce && \
+    apt-get clean && \
+    usermod -aG docker jenkins
 
-RUN chown jenkins:jenkins -R /usr/share/jenkins && \
-    chown jenkins:jenkins -R /var/jenkins_home
-
-USER jenkins
-
-VOLUME ["/var/jenkins_home/logs", "/var/jenkins_home/cache"]
-VOLUME ["/var/jenkins_home/jobs", "/var/jenkins_home/jenkins-jobs"]
-VOLUME ["/var/jenkins_home/secrets"]
+RUN chown -R ${user} "$JENKINS_HOME" /usr/share/jenkins/ref
